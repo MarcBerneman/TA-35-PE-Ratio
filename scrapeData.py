@@ -171,6 +171,9 @@ while True:
     except TimeoutException:
         input('\nTimeoutException: please fix the issue and press Enter. Bringing the window into view might help...')
         continue
+    except FileNotFoundError:
+        input('\nFileNotFoundError: please fix the issue and press Enter. Bringing the window into view might help...')
+        continue
     break
 
 driver.quit()
