@@ -22,7 +22,8 @@ from tqdm import tqdm
 import datetime
 
 sleep_time = 1.5
-sleep = lambda : time.sleep(sleep_time)
+def sleep(_sleep_time=sleep_time):
+    time.sleep(_sleep_time)
 
 download_dir = Path.cwd() / 'data'  / datetime.date.today().strftime('%d%m%Y')
 download_dir.mkdir(exist_ok=True)
@@ -116,8 +117,6 @@ def get_company_finance_report(security_id):
         with open(download_dir / 'currency.csv', 'a') as f:
             f.write(f"{symbol},{currency}\n")
 
-        sleep()
-
         download_btn = wait.until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -126,7 +125,10 @@ def get_company_finance_report(security_id):
         )
         ActionChains(driver).move_to_element(download_btn).pause(0.3).click().perform()
 
-        sleep()
+        for _ in range(20):
+            sleep(0.1)
+            if file_download.exists():
+                 break
 
         file_download.rename(file)
 
