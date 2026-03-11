@@ -138,7 +138,7 @@ def get_currency_exchange():
         url = 'https://market.tase.co.il/en/market_data/daily-review/exchange_rates'
         driver.get(url)
 
-        sleep()
+        wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, ".ngx-spinner-overlay")))
 
         download_button = wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Download Data']"))
