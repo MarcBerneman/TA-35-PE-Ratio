@@ -20,6 +20,7 @@ import pandas as pd
 import time
 from tqdm import tqdm
 import datetime
+import warnings
 
 sleep_time = 1.5
 def sleep(_sleep_time=sleep_time):
@@ -88,12 +89,12 @@ def get_index_components():
 
         sleep()
 
-def get_company_finance_report(security_id):
+def get_company_finance_report(_security_id, _symbol, _name):
     file_download = download_dir / 'financial-report.csv'
     file_download.unlink(missing_ok=True)
-    file = download_dir / f'{symbol}FinanceReport.csv'
+    file = download_dir / f'{_symbol}FinanceReport.csv'
     if not file.exists():
-        company_id = get_company_id(driver, security_id)
+        company_id = get_company_id(driver, _security_id)
         url = f'https://maya.tase.co.il/en/companies/{company_id}/financial-reports'
         driver.get(url)
 
@@ -103,6 +104,11 @@ def get_company_finance_report(security_id):
                 (By.XPATH, "//h2[contains(text(),'Financial Statements – Key Data')]")
             )
         )
+
+        # get the title and validate it
+        title = driver.title
+        if _name.split(' ')[0] not in title:
+            warnings.warn(f'Page title: {title} may not be valid for company name: {_name}')
 
         # Get the text
         heading_text = heading.text
@@ -163,13 +169,14 @@ while True:
         file = download_dir / 'indexcomponents.csv'
         df = pd.read_csv(file, header=2)
         df.columns = df.columns.str.strip()  # remove space from column names
-        df = df[['Symbol', 'Security No']]
+        df = df[['Symbol', 'Security No', 'Name']]
 
         for i in tqdm(range(len(df))):
             symbol = df['Symbol'].iloc[i]
             security_id = df['Security No'].iloc[i]
+            name = df['Name'].iloc[i]
 
-            get_company_finance_report(security_id)
+            get_company_finance_report(security_id, symbol, name)
     except TimeoutException:
         input('\nTimeoutException: please fix the issue and press Enter. Bringing the window into view might help...')
         continue
